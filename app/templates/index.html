@@ -1,0 +1,33 @@
+<html>
+    <head>
+		<link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+		<script href="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+		<link href="{{ url_for('static', filename='css/font-awesome.css') }}" type="text/css" rel="stylesheet">
+		<title>MST Sohbet Sistemi</title>
+    </head>
+    <body style="background-color:#e1e1e1">
+        <div class="container">
+            <div class="col-4-md text-center"></div>
+            <div class="col-4-md text-center">
+                <h2 style="text-align:center; margin-top:80px">MST Sohbet Sistemi</h2><br>
+                <form method="POST">
+                    <table style="align:center">
+                        <tr>
+                            <td>{{ form.hidden_tag() }}{{ form.name.label }}:</td>
+                            <td>{{ form.name() }} {% for error in form.name.errors %}{{ error }}{% endfor %}</td>
+                        </tr>
+                        <tr>
+                            <td>{{ form.room.label }}:</td>
+                            <td>{{ form.room() }} {% for error in form.room.errors %}{{ error }}{% endfor %}</td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td>{{ form.submit() }}</td>
+                        </tr>
+                    </table>
+                </form>
+            </div>
+            <div class="col-4-md text-center"></div>
+        </div>
+    </body>
+</html>
