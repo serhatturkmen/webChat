@@ -22,7 +22,7 @@
 					$('#mesaj').append('<div class="chat_people"><div class="received_withd_msg"><p>'+ data.msg +'</p></div></div>');
 					masaustuBildirim('MST Sohbet Yazılımı',data.msg,'http://127.0.0.1:5000/chat');
 				});
-				socket.on('message', function(data) {
+				socket.on('message', function(data) {//gelen mesaj ve giden mesaj
 					$('#mesaj').append('<div class="chat_people"><div class="received_withd_msg"><p><span class="name">'+ data.name +'</span><b>'+ data.msg +'</b></p></div></div>');
 					$('#scroll').scrollTop($('#scroll')[0].scrollHeight);
 				});
