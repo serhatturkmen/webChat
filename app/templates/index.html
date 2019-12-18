@@ -1,17 +1,27 @@
 <html>
     <head>
+        <meta charset="utf-8">
+    	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 		<link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
 		<script href="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
 		<link href="{{ url_for('static', filename='css/font-awesome.css') }}" type="text/css" rel="stylesheet">
 		<title>MST Sohbet Sistemi</title>
+        <style>
+            td{
+                padding:5px;
+            }
+            input{
+                width:200px;
+            }
+        </style>
     </head>
     <body style="background-color:#e1e1e1">
         <div class="container">
-            <div class="col-4-md text-center"></div>
-            <div class="col-4-md text-center">
+            <div class="col-md-4 text-center"></div>
+            <div class="col-md-4 text-center">
                 <h2 style="text-align:center; margin-top:80px">MST Sohbet Sistemi</h2><br>
                 <form method="POST">
-                    <table style="align:center">
+                    <table>
                         <tr>
                             <td>{{ form.hidden_tag() }}{{ form.name.label }}:</td>
                             <td>{{ form.name() }} {% for error in form.name.errors %}{{ error }}{% endfor %}</td>
@@ -27,7 +37,7 @@
                     </table>
                 </form>
             </div>
-            <div class="col-4-md text-center"></div>
+            <div class="col-md-4 text-center"></div>
         </div>
     </body>
 </html>

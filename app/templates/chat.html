@@ -1,16 +1,18 @@
 <html>
 	<head>
+		<meta charset="utf-8">
+    	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 		<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 		<link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
 		<script href="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
-		<script href="js/bootstrap.min.js"></script>
-		<script href="js/jquery.min.js"></script>
+		<script href="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
 		<link href="{{ url_for('static', filename='css/font-awesome.css') }}" type="text/css" rel="stylesheet">
 		<title>MST Sohbet Sistemi - {{ room }}</title>
 		<script type="text/javascript" src="{{ url_for('static', filename='js/jquery-1.4.2.min.js') }}"></script>
 		<script type="text/javascript" src="{{ url_for('static', filename='js/socket.io.min.js') }}"></script>
 		<script type="text/javascript" charset="utf-8">
 			var socket;
+			
 			$(document).ready(function(){
 				socket = io.connect('http://' + document.domain + ':' + location.port + '/chat');
 				socket.on('connect', function() {
@@ -18,9 +20,15 @@
 				});
 				socket.on('status', function(data) {//katılma
 					$('#mesaj').append('<div class="chat_people"><div class="received_withd_msg"><p>'+ data.msg +'</p></div></div>');
+					masaustuBildirim('MST Sohbet Yazılımı',data.msg,'http://127.0.0.1:5000/chat');
 				});
 				socket.on('message', function(data) {
 					$('#mesaj').append('<div class="chat_people"><div class="received_withd_msg"><p><span class="name">'+ data.name +'</span><b>'+ data.msg +'</b></p></div></div>');
+					$('#scroll').scrollTop($('#scroll')[0].scrollHeight);
+				});
+				socket.on('users', function(data) {
+					$( "#kullanicilar" ).empty();
+					$('#kullanicilar').append('<div class="chat_ib">'+ data.user +'</div>');
 				});
 				$('#text').keypress(function(e) {
 					var code = e.keyCode || e.which;
@@ -42,21 +50,39 @@
 					window.location.href = "{{ url_for('main.index') }}";
 				});
 			}
+			function masaustuBildirim(baslik, detay, link) {
+				//Daha önceden izin alınmamışsa izin alınıyor
+				if (Notification.permission !== "granted")
+					Notification.requestPermission();
+		
+				//Belirtilen detaylara göre bildirim gösteriliyor
+				var notification = new Notification(baslik, {
+					body: detay
+				});
+		
+				//Bildirime tıklanınca açılacak sayfa ayarlanıyor
+				notification.onclick = function() {
+					window.open(link);
+				}
+			}
 		</script>
 	</head>
 	<body>
-		<div class="container">
-			<div class="messaging">
-				<div class="inbox_msg">
-				<div class="inbox_people" style="width: 30%; float: left;">
+		<div class="container-fluid">
+			<div class="row">
+				<div class="col-sm-4">
 					<div class="headind_srch">
 						<div class="recent_heading">
 							<h4>MST Sohbet Sistemi</h4>
 							Tasarlayan Serhat TÜRKMEN
 						</div>
 					</div>
-					<div class="inbox_chat">
 						<div class="chat_list">
+							<div class="chat_people">
+								<div class="chat_ib">
+									Oda Adı : {{room}}
+								</div>
+							</div>
 							<a href="#" onclick="leave_room();">
 								<div class="chat_people">
 									<div class="chat_ib">
@@ -65,31 +91,27 @@
 								</div>
 							</a>
 						</div>
-					</div>
-				</div>
-				<div class="mesgs">
-					<div class="inbox_chat">
-						<div id="mesaj" class="incoming_msg">
-						</div>
-					</div>
-					<!--
-					<div class="msg_history">
-						<div id="mesaj" class="outgoing_msg">
-							<div class="chat_people">
-								<div class="sent_msg">
-									<p><span class="name">Deneme</span>atılan mesaj</p>
-								</div>
+						<div class="chat_list">
+							<div class="recent_heading">
+								<h4>Çevrimiçi olanlar</h4>
+							</div>
+							<div class="chat_people" id="kullanicilar">
 							</div>
 						</div>
-					</div>
-					-->
-					<div class="type_msg">
-						<div class="input_msg_write">
-							<input id="text" size="70" placeholder="Bir mesaj yazınız...">
-						</div>
-					</div>
 				</div>
-			</div>      
+				<div class="col-sm-8">
+					<div class="mesgs">
+						<div id="scroll" class="inbox_chat">
+							<div id="mesaj" class="incoming_msg">
+							</div>
+						</div>
+						<div class="type_msg">
+							<div class="input_msg_write">
+								<input id="text" size="70" placeholder="Bir mesaj yazınız...">
+							</div>
+						</div>
+					</div> 
+				</div>
 			</div>
 		</div>
 	</body>
