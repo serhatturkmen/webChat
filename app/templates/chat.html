@@ -4,44 +4,56 @@
     	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 		<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 		<link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
-		<script href="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
 		<script href="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
+		<script href="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
 		<link href="{{ url_for('static', filename='css/font-awesome.css') }}" type="text/css" rel="stylesheet">
 		<title>MST Sohbet Sistemi - {{ room }}</title>
 		<script type="text/javascript" src="{{ url_for('static', filename='js/jquery-1.4.2.min.js') }}"></script>
 		<script type="text/javascript" src="{{ url_for('static', filename='js/socket.io.min.js') }}"></script>
 		<script type="text/javascript" charset="utf-8">
 			var socket;
-			
 			$(document).ready(function(){
-				socket = io.connect('http://' + document.domain + ':' + location.port + '/chat');
-				socket.on('connect', function() {
-					socket.emit('joined', {});
-				});
-				socket.on('status', function(data) {//katılma
-					$('#mesaj').append('<div class="chat_people"><div class="received_withd_msg"><p>'+ data.msg +'</p></div></div>');
-					masaustuBildirim('MST Sohbet Yazılımı',data.msg,'http://127.0.0.1:5000/chat');
-				});
-				socket.on('message', function(data) {//gelen mesaj ve giden mesaj
-					$('#mesaj').append('<div class="chat_people"><div class="received_withd_msg"><p><span class="name">'+ data.name +'</span><b>'+ data.msg +'</b></p></div></div>');
-					$('#scroll').scrollTop($('#scroll')[0].scrollHeight);
-				});
-				socket.on('users', function(data) {
-					$( "#kullanicilar" ).empty();
-					$('#kullanicilar').append('<div class="chat_ib">'+ data.user +'</div>');
-				});
-				$('#text').keypress(function(e) {
-					var code = e.keyCode || e.which;
-					if (code == 13) {
-						text = $('#text').val();
-						if(text=="" || text==" "){
-							alert("Veri girişi yok")
-						}else{
-							$('#text').val('');
-							socket.emit('text', {msg: text});
+				if (window.location.pathname == '/chat') {
+					// çallışacak fonksiyon
+					socket = io.connect('http://' + document.domain + ':' + location.port + '/chat');
+					socket.on('connect', function() {
+						socket.emit('joined', {});
+					});
+					socket.on('status', function(data) {//katılma
+						$('#mesaj').append('<div class="chat_people"><div class="received_withd_msg"><p>'+ data.msg +'</p></div></div>');
+						masaustuBildirim('MST Sohbet Yazılımı',data.msg);
+					});
+					socket.on('message', function(data) {//gelen mesaj ve giden mesaj
+						$('#mesaj').append('<div class="chat_people"><div class="received_withd_msg"><p><span class="name">'+ data.name +'<span class="pull-right">'+data.tarih+'</span></span><b>'+ data.msg +'</b></p></div></div>');
+						$('#scroll').scrollTop($('#scroll')[0].scrollHeight);
+					});
+					socket.on('users', function(data) {
+						$( "#kullanicilar" ).empty();
+						$('#kullanicilar').append('<div>'+ data.user +'</div>');
+						/*
+						kullanici=data.user;
+						var dizi = kullanici.split(",");
+						for (var i=0; i<dizi.length; i++)
+						{
+							$('#kullanicilar').append('<div>'+ dizi[i] +'</div>');
 						}
-					}
-				});
+						//document.write(gunler.length);
+						*/
+					});
+					$('#text').keypress(function(e) {
+						var code = e.keyCode || e.which;
+						if (code == 13) {
+							text = $('#text').val();
+							if(text=="" || text==" "){
+								alert("Veri girişi yok")
+							}else{
+								$('#text').val('');
+								socket.emit('text', {msg: text});
+							}
+						}
+					});
+				}
+				
 			});
 			function leave_room() {
 				socket.emit('left', {}, function() {
@@ -50,7 +62,7 @@
 					window.location.href = "{{ url_for('main.index') }}";
 				});
 			}
-			function masaustuBildirim(baslik, detay, link) {
+			function masaustuBildirim(baslik, detay) {
 				//Daha önceden izin alınmamışsa izin alınıyor
 				if (Notification.permission !== "granted")
 					Notification.requestPermission();
@@ -59,45 +71,49 @@
 				var notification = new Notification(baslik, {
 					body: detay
 				});
-		
+				/*
 				//Bildirime tıklanınca açılacak sayfa ayarlanıyor
+				//function masaustuBildirim(baslik, detay,link)
 				notification.onclick = function() {
 					window.open(link);
 				}
+				*/
 			}
 		</script>
 	</head>
 	<body>
+		<nav class="navbar navbar-default navbar-fixed-top">
+			<div class="container-fluid">
+				<div class="navbar-header">
+				<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+					<span class="sr-only">Toggle navigation</span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+				</button>
+				<a class="navbar-brand">MST Sohbet Sistemi</a>
+				</div>
+				<div id="navbar" class="navbar-collapse collapse">
+				<ul class="nav navbar-nav navbar-right">
+					<li><a>Kullanıcı Adınız : {{name}}</a></li>
+					<li><a>Oda Adı : {{room}}</a></li>
+					<li><a href="#" onclick="leave_room();">Odadan Ayrıl</a></li>
+					<li><a>Tasarlayan: Muhammed Serhat TÜRKMEN</a></li>
+				</ul>
+				</div>
+			</div>
+		</nav>
 		<div class="container-fluid">
 			<div class="row">
 				<div class="col-sm-4">
-					<div class="headind_srch">
+					<div class="chat_list">
 						<div class="recent_heading">
-							<h4>MST Sohbet Sistemi</h4>
-							Tasarlayan Serhat TÜRKMEN
+							<h4>Çevrimiçi olanlar</h4>
+						</div>
+						<div class="chat_people" id="kullanicilar">
 						</div>
 					</div>
-						<div class="chat_list">
-							<div class="chat_people">
-								<div class="chat_ib">
-									Oda Adı : {{room}}
-								</div>
-							</div>
-							<a href="#" onclick="leave_room();">
-								<div class="chat_people">
-									<div class="chat_ib">
-										Odadan ayrıl
-									</div>
-								</div>
-							</a>
-						</div>
-						<div class="chat_list">
-							<div class="recent_heading">
-								<h4>Çevrimiçi olanlar</h4>
-							</div>
-							<div class="chat_people" id="kullanicilar">
-							</div>
-						</div>
 				</div>
 				<div class="col-sm-8">
 					<div class="mesgs">

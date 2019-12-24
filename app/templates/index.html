@@ -19,7 +19,8 @@
         <div class="container">
             <div class="col-md-4 text-center"></div>
             <div class="col-md-4 text-center">
-                <h2 style="text-align:center; margin-top:80px">MST Sohbet Sistemi</h2><br>
+                <div class="well"><h2>MST Sohbet Sistemi</h2>
+                <hr>
                 <form method="POST">
                     <table>
                         <tr>
@@ -34,8 +35,13 @@
                             <td></td>
                             <td>{{ form.submit() }}</td>
                         </tr>
+                        <tr>
+                            <td></td>
+                            <td>{{ uyari }}</td>
+                        </tr>
                     </table>
                 </form>
+                </div>
             </div>
             <div class="col-md-4 text-center"></div>
         </div>

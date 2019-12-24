@@ -3,31 +3,42 @@ from flask import session
 from flask_socketio import emit, join_room, leave_room
 from .. import socketio
 import  sqlite3
+from datetime import datetime
 kullanicilar=list()
+
 @socketio.on('joined', namespace='/chat')
 def joined(message):
     """Müşteriler bir odaya girdiklerinde gönderilir.
      Odadaki tüm kullanıcılara bir durum mesajı yayınlanır."""
     room = session.get('room')
-    join_room(room)
-    emit('status', {'msg': session.get('name') + ' adlı kullanıcı odaya katıldı.','name':session.get('name')}, room=room)
-    mesaj=session.get('name')+' '+'adlı kullanıcı odaya katıldı.'
-    kullanicilar.append(session.get('name'))
-    emit('users', {'user': kullanicilar}, room=room)
-    ekle(mesaj,room,'')
-    eskiMesajlar(room)
+    name = session.get('name')
+    if(name in kullanicilar):
+        join_room(room)
+        emit('users', {'user': kullanicilar}, room=room)
+        eskiMesajlar(room)
+    else:
+        join_room(room)
+        emit('status', {'msg': name + ' adlı kullanıcı odaya katıldı.','name':name}, room=room)
+        mesaj=name+' '+'adlı kullanıcı odaya katıldı.'
+        kullanicilar.append(name)
+        tarihsaat = datetime.now().strftime("%d-%m-%Y %H:%M")
+        ekle(mesaj,room,'',tarihsaat)
+        emit('users', {'user': kullanicilar}, room=room)
+        eskiMesajlar(room)
+
 def eskiMesajlar(room):
     room = session.get('room')
     vt=sqlite3.connect('database.db')
     im=vt.cursor()
     veriler=im.execute("SELECT * FROM mesajlar WHERE oda=?",[room])
     for veri in veriler:
-        emit('message', {'msg': veri[1] ,'name':veri[3]}, room=room)
+        emit('message', {'msg': veri[1] ,'name':veri[3],'tarih':veri[4]}, room=room)
     vt.close()
-def ekle(mesaj,room,name):
+
+def ekle(mesaj,room,name,tarih):
     vt=sqlite3.connect('database.db')
     im=vt.cursor()
-    im.execute("INSERT INTO mesajlar(mesaj,oda,isim) VALUES(?,?,?)",[mesaj,room,name])
+    im.execute("INSERT INTO mesajlar(mesaj,oda,isim,tarih) VALUES(?,?,?,?)",[mesaj,room,name,tarih])
     vt.commit()
     vt.close()
 
@@ -39,10 +50,10 @@ def text(message):
     room = session.get('room')
     #türkçe karakter sorunu
     mesaj = message['msg'].encode('latin-1').decode('utf-8')
-    emit('message', {'msg': mesaj,'name':session.get('name')}, room=room)
+    tarihsaat = datetime.now().strftime("%d-%m-%Y %H:%M")
+    emit('message', {'msg': mesaj,'name':session.get('name'),'tarih':tarihsaat}, room=room)
     isim=session.get('name')
-    mesaj=mesaj
-    ekle(mesaj,room,isim)
+    ekle(mesaj,room,isim,tarihsaat)
 
 @socketio.on('left', namespace='/chat')
 def left(message):
@@ -51,8 +62,9 @@ def left(message):
     room = session.get('room')
     name = session.get('name')
     leave_room(room)
-    emit('status', {'msg': name + ' adlı kullanıcı odadan ayrıldı.'}, room=room)
+    tarihsaat = datetime.now().strftime("%d-%m-%Y %H:%M")
+    mesaj=name+' '+' adlı kullanıcı odadan ayrıldı.'
+    emit('status', {'msg': mesaj}, room=room)
     kullanicilar.remove(name)
     emit('users', {'user': kullanicilar}, room=room)
-    mesaj=name+' '+' adlı kullanıcı odadan ayrıldı.'
-    ekle(mesaj,room,'')
+    ekle(mesaj,room,'',tarihsaat)
